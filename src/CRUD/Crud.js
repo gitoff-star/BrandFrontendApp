@@ -36,24 +36,35 @@ export default function Crud() {
   //     },
   //   ];
 
+  const handleEdit = (id) => {
+    const url = "";
+    axios
+      .get(`https://localhost:7250/api/Brands/${id}`)
+      .then((res) => {
+        seteditName(res.data.name);
+        seteditAurthor(res.data.author);
+        seteditDescription(res.data.description);
+        setId(id);
+      })
+      .catch((err) => toast.success(err));
+
+    setShowModal(true);
+  };
   const handleUpdate = (id) => {
     const url = `https://localhost:7250/api/Brands/${id}`;
 
-    const data={
-        id:id,
-        name:editname,
-        description:editdescription,
-        author:editaurthor
-
-    }
-  axios.put(url,data).then(res =>{
-    toast.success("item has been updated");
-    clear();
-    handleClose();
-    getData();
-    
-})
-
+    const data = {
+      id: id,
+      name: editname,
+      description: editdescription,
+      author: editaurthor,
+    };
+    axios.put(url, data).then((res) => {
+      toast.success("item has been updated");
+      clear();
+      handleClose();
+      getData();
+    });
   };
 
   const handleDelete = (id) => {
@@ -247,7 +258,7 @@ export default function Crud() {
             </Container>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="primary" onClick={()=>handleUpdate(id)}>
+            <Button variant="primary" onClick={() => handleUpdate(id)}>
               update
             </Button>
             <Button variant="secondary" onClick={handleClose}>
