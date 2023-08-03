@@ -36,7 +36,16 @@ export default function Crud() {
   //     },
   //   ];
 
+  const handleUpdate = (id) => {
+    const url = `https://localhost:7250/api/Brands/${id}`;
 
+    const data={
+        id:id,
+        name:editname,
+        description:editdescription,
+        author:editaurthor
+
+    }
   axios.put(url,data).then(res =>{
     toast.success("item has been updated");
     clear();
