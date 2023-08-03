@@ -36,6 +36,17 @@ export default function Crud() {
   //     },
   //   ];
 
+
+  axios.put(url,data).then(res =>{
+    toast.success("item has been updated");
+    clear();
+    handleClose();
+    getData();
+    
+})
+
+  };
+
   const handleDelete = (id) => {
     if (window.confirm("are you sure to delete this item") === true) {
       const url = `https://localhost:7250/api/Brands/${id}`;
