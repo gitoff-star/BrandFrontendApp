@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useContext, useState, useEffect, Fragment } from "react";
 import { Button, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
@@ -7,6 +7,8 @@ import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import authContext from "../context/AuthProvider";
+import { useNavigate } from "react-router-dom";
 
 export default function Crud() {
   //   const brandData = [
@@ -35,16 +37,47 @@ export default function Crud() {
   //       Aurthor: "test",
   //     },
   //   ];
+  const [islogged, setLogin] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [data, setdata] = useState([]);
+  //value state add and edit
+
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [aurthor, setAurthor] = useState("");
+
+  const [id, setId] = useState("");
+  const [editname, seteditName] = useState("");
+  const [editdescription, seteditDescription] = useState("");
+  const [editaurthor, seteditAurthor] = useState("");
+
+
+
+
+const navigate= useNavigate();
+  const { authToken,setAuth } = useContext(authContext);
+  // if(authToken==null){
+  //   return <> 
+  //   <div>Loading ...</div>
+  //   </>
+  // }
+  
+  const { token } = authToken;
+  const headers = {
+    Authorization: "Bearer " + token,
+  };
+
+  
 
   const handleEdit = (id) => {
-    const url = "";
+    const url = `https://localhost:7250/api/Brands/${id}`;
     axios
-      .get(`https://localhost:7250/api/Brands/${id}`)
+      .get(url)
       .then((res) => {
         seteditName(res.data.name);
         seteditAurthor(res.data.author);
         seteditDescription(res.data.description);
-        setId(id)
+        setId(id);
       })
       .catch((err) => toast.success(err));
 
@@ -54,22 +87,19 @@ export default function Crud() {
   const handleUpdate = (id) => {
     const url = `https://localhost:7250/api/Brands/${id}`;
 
-    const data={
-        id:id,
-        name:editname,
-        description:editdescription,
-        author:editaurthor
+    const data = {
+      id: id,
+      name: editname,
+      description: editdescription,
+      author: editaurthor,
+    };
 
-    }
-
-axios.put(url,data).then(res =>{
-    toast.success("item has been updated");
-    clear();
-    handleClose();
-    getData();
-    
-})
-
+    axios.put(url, data).then((res) => {
+      toast.success("item has been updated");
+      clear();
+      handleClose();
+      getData();
+    });
   };
 
   const handleDelete = (id) => {
@@ -84,15 +114,39 @@ axios.put(url,data).then(res =>{
         .catch((error) => toast.success(error));
     }
   };
-  const [data, setdata] = useState([]);
+  
 
   const getData = () => {
-    axios
-      .get("https://localhost:7250/api/Brands")
-      .then((result) => setdata(result.data))
+    if(!token){
+      return (<>
+        <div>Loading....</div>
+      </>)
+    }
 
-      .catch((error) => console.log(error));
+    console.log(`token is ${JSON.stringify(headers)}`);
+    axios
+      .get("https://localhost:7250/api/Brands/get", { headers })
+      .then(
+        (result) => {
+          setdata(result.data)
+        setLogin(true);
+        })
+
+      .catch((error) =>{ console.log(error)
+      setLogin(false);
+      });
   };
+
+  useEffect(() => {
+    getData();
+  }, []);
+
+  const handleLogout =()=>{
+    setAuth({token:null});
+    clear();
+    navigate('/Login');
+  }
+
 
   const postData = () => {
     const url = "https://localhost:7250/api/Brands";
@@ -120,31 +174,24 @@ axios.put(url,data).then(res =>{
     seteditDescription("");
     seteditAurthor("");
   };
-  useEffect(() => {
-    getData();
-  }, []);
-  const [showModal, setShowModal] = useState(false);
+
+  
 
   const handleClose = () => {
     setShowModal(false);
   };
 
-  //value state add and edit
 
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [aurthor, setAurthor] = useState("");
-
-  const [id, setId] = useState("");
-  const [editname, seteditName] = useState("");
-  const [editdescription, seteditDescription] = useState("");
-  const [editaurthor, seteditAurthor] = useState("");
 
   return (
     <div>
       <Fragment>
         <ToastContainer />
         <Container>
+        <Row>
+          {islogged? <Button onClick={handleLogout}>Logout</Button> : ""}
+        </Row>
+        <br></br>
           <Row>
             <Col>
               <input
@@ -262,7 +309,7 @@ axios.put(url,data).then(res =>{
             </Container>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="primary" onClick={()=>handleUpdate(id)}>
+            <Button variant="primary" onClick={() => handleUpdate(id)}>
               update
             </Button>
             <Button variant="secondary" onClick={handleClose}>
